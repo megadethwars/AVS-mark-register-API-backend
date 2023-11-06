@@ -8,6 +8,8 @@ import sqlalchemy
 from . import db
 from sqlalchemy import Date,cast
 from sqlalchemy import or_
+from .UsersModel import UsuariosSchema
+from .ProyectoModel import ProyectoSchema
 class BitacoraModel(db.Model):
     """
     Catalogo Model
@@ -34,7 +36,9 @@ class BitacoraModel(db.Model):
         "UsersModel",backref=db.backref("invUsers",lazy=True)
     )
 
-  
+    usuario=db.relationship(
+        "UsersModel",backref=db.backref("invUsers",lazy=True)
+    )
     proyecto=db.relationship(
         "ProyectoModel",backref=db.backref("invProyectos",lazy=True)
     )
@@ -73,35 +77,6 @@ class BitacoraModel(db.Model):
     @staticmethod
     def get_one_Bitacora(id):
         return BitacoraModel.query.get(id)
-    
-    @staticmethod
-    def get_all_Bitacora_by_like(value,offset=1,limit=10):
-        lugares=[]
-        devices=[]
-        users=[]
-
-        lugar = LugaresModel.get_lugar_by_like(value,offset=1,limit=100)
-        
-        if len(lugar.items)!=0:
-            for x in lugar.items:
-                lugares.append(x.id)
-        
-        device = DispositivosModel.get_device_by_codigo_like_entity(value,offset=1,limit=1000)
-        
-        if len(device.items)!=0:
-            for x in device.items:
-                devices.append(x.id)
-        
-        user = UsuariosModel.get_user_by_params_like_entity(value,offset=1,limit=100)
-        
-        if len(user.items)!=0:
-            for x in user.items:
-                users.append(x.id)
-
-     
-        result = BitacoraModel.query.filter(or_(BitacoraModel.usuarioId.in_(users),BitacoraModel.dispositivoId.in_(devices), BitacoraModel.comentarios.ilike(f'%{value}%'))).order_by(BitacoraModel.id).paginate(page=offset,per_page=limit,error_out=False) 
-        return result
-
 
     @staticmethod
     def get_Bitacora_by_query(jsonFiltros,offset=1,limit=5):
@@ -135,7 +110,7 @@ class BitacoraSchema(Schema):
     usuarioId = fields.Integer(required=True)
     comentario = fields.Str(required=True)
     isVentana = fields.Bool()
-    dispositivo = fields.Nested(DispositivosSchema)
+    proyecto = fields.Nested(ProyectoSchema)
     usuario = fields.Nested(UsuariosSchema)
     fechaInicio = fields.DateTime()
     fechaFin = fields.DateTime()
@@ -151,6 +126,8 @@ class BitacoraSchemaUpdate(Schema):
     usuarioId = fields.Integer()
     comentario = fields.Str()
     isVentana = fields.Bool()
+    proyecto = fields.Nested(ProyectoSchema)
+    usuario = fields.Nested(UsuariosSchema)
     fechaInicio = fields.DateTime()
     fechaFin = fields.DateTime()
     fechaUltimaModificacion = fields.DateTime()
