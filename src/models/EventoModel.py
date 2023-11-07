@@ -2,6 +2,7 @@
 from marshmallow import fields, Schema, validate
 import datetime
 from . import db
+from .ProyectoModel import ProyectoSchema
 
 class EventoModel(db.Model):
     """
@@ -76,6 +77,7 @@ class EventosSchema(Schema):
     fechaAlta = fields.DateTime()
     fechaUltimaModificacion = fields.DateTime()
     activo = fields.Boolean()
+    evento = fields.Nested(ProyectoSchema)
 
 
 class EventosSchemaUpdate(Schema):
