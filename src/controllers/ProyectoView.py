@@ -1,6 +1,5 @@
 # /src/views/GiroView
 
-from email.policy import default
 from flask import Flask, request, json, Response, Blueprint, g
 from marshmallow import ValidationError
 from sqlalchemy import true
@@ -23,7 +22,7 @@ proyecto_schema_update = ProyectoSchemaUpdate()
 proyecto_schema_query = ProyectosSchemaQuery()
 api = Api(proyecto_api)
 
-nsProyecto = api.namespace("preoyectos", description="API operations for proyectos")
+nsProyecto = api.namespace("proyectos", description="API operations for proyectos")
 
 ProyectoQueryModel = nsProyecto.model(
     "proyectoQuery",
