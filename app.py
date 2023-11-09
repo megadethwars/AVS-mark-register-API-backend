@@ -2,7 +2,7 @@
 import os
 
 from flask import Flask, current_app, render_template
-from src.appinit import create_app
+from .src.appinit import create_app
 
 
 env_name = 'local'

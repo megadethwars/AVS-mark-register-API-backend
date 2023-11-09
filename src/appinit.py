@@ -9,15 +9,13 @@ from .shared import returnCodes
 #from .views.LugaresView import lugares_api as lugares_blueprint
 #from views.LugaresView import nsLugares as nsLugares
 
-from .controllers.LugaresView import nsLugares
+from .controllers.BitacoraView import nsBitacora
 from .controllers.RolesView import nsRoles
-from .controllers.EstatusUsuariosView import nsStatusUsuarios
-from .controllers.UsuariosView import nsUsuarios
-from .controllers.DispositivosView import nsDevices
-from .controllers.ReportesView import nsReports
-from .controllers.TipoMovimientosView import nstipomoves
-from .controllers.MovimientosView import nsMovements
-from .controllers.StatusDevicesView import nsStatusDevice
+from .controllers.UsersView import nsUsuarios
+from .controllers.ProyectoView import nsProyecto
+from .controllers.EventosView import nsEvento
+from .controllers.StatusProyectoView import nsStatusProyecto
+
 
 from flask_restx import Api, fields, Resource
 from flask_sqlalchemy import SQLAlchemy
@@ -44,16 +42,14 @@ def create_app(env_name):
     api = Api(app,title="AVS Marks register API", version="1.1", description="A Marks register API",)
 
 
-   
-    api.add_namespace(ns=nsLugares,path="/api/v1/lugares")
+
     api.add_namespace(ns=nsRoles,path="/api/v1/roles")
-    api.add_namespace(ns=nsStatusUsuarios,path="/api/v1/statusUsuarios")
-    api.add_namespace(ns=nsUsuarios,path="/api/v1/usuarios")
-    api.add_namespace(ns=nsDevices,path="/api/v1/dispositivos")
-    api.add_namespace(ns=nsReports,path="/api/v1/reportes")
-    api.add_namespace(ns=nstipomoves,path="/api/v1/tipomoves")
-    api.add_namespace(ns=nsMovements,path="/api/v1/movimientos")
-    api.add_namespace(ns=nsStatusDevice,path="/api/v1/statusDevices")
+    api.add_namespace(ns=nsBitacora,path="/api/v1/bitacora")
+    api.add_namespace(ns=nsUsuarios,path="/api/v1/users")
+    api.add_namespace(ns=nsProyecto,path="/api/v1/proyecto")
+    api.add_namespace(ns=nsStatusProyecto,path="/api/v1/statusProyecto")
+    api.add_namespace(ns=nsEvento,path="/api/v1/evento")
+
     
     @app.errorhandler(404) 
     def not_found(e):

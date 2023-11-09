@@ -4,8 +4,6 @@ from flask import Flask, request, json, Response, Blueprint, g
 from marshmallow import ValidationError
 from sqlalchemy import true
 
-
-from ..models.DispositivosModel import DispositivosModel
 from ..models.StatusProyectoModel import StatusProyectoModel
 from ..models.ProyectoModel import ProyectoModel,ProyectoSchema,ProyectoSchemaUpdate,ProyectosSchemaQuery
 from ..models import db
