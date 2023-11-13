@@ -48,7 +48,7 @@ class StatusProyectoModel(db.Model):
 
     @staticmethod
     def get_status_by_nombre(value):
-        return StatusProyectoModel.query.filter_by(descripcion=value).first()
+        return StatusProyectoModel.query.filter_by(descripcionStatus=value).first()
 
     def __repr(self):
         return '<id {}>'.format(self.id)

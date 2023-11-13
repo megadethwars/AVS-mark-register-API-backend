@@ -48,6 +48,8 @@ def createEvento(req_data, listaObjetosCreados, listaErrores):
         error = returnCodes.partial_response("TPM-2",str(err))
         listaErrores.append(error)
         return returnCodes.custom_response(None, 400, "TPM-2", str(err))
+    
+    
 
     # Aquí hacemos las validaciones para ver si el catalogo de negocio ya existe previamente
     proyecto_in_db = ProyectoModel.get_one_project(data.get("ProyectoId"))

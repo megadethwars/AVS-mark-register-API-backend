@@ -21,7 +21,7 @@ class EventoModel(db.Model):
         db.Integer,db.ForeignKey("invProyectos.id"),nullable=False
     )
     Proyecto=db.relationship(
-        "ProyectoModel",backref=db.backref("invProyectos",lazy=True)
+        "ProyectoModel",backref=db.backref("invProyectos2",lazy=True)
     )
 
     def __init__(self, data):

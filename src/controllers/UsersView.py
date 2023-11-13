@@ -31,8 +31,7 @@ UsersModelApi = nsUsuarios.model(
         "password":fields.String(required=True, description="password"),
         "telefono":fields.String(required=True, description="telefono"),
         "correo":fields.String(required=True, description="correo"),
-        "rolId":fields.Integer(required=True, description="rolId"),
-        "statusId":fields.Integer(required=True, description="statusId")
+        "rolId":fields.Integer(required=True, description="rolId")
     }
 )
 

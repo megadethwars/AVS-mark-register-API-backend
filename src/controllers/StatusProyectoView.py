@@ -21,9 +21,6 @@ StatusProyectoModelApi = nsStatusProyecto.model(
     }
 )
 
-StatusProyectoModelListApi = nsStatusProyecto.model('StatusProyectoList', {
-    'StatusProyecto': fields.List(fields.Nested(StatusProyectoModelApi)),
-})
 
 StatusProyectoPutApi = nsStatusProyecto.model(
     "StatusProyectoputModel",

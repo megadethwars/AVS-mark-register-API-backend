@@ -80,7 +80,7 @@ class RolesList(Resource):
         serialized_roles = roles_schema.dump(roles, many=True)
         return returnCodes.custom_response(serialized_roles, 200, "TPM-3")
 
-    @nsRoles.doc("Crear catalogo")
+    @nsRoles.doc("Crear rol")
     @nsRoles.expect(RolesModelApi)
     @nsRoles.response(201, "created")
     def post(self):
@@ -103,9 +103,9 @@ class RolesList(Resource):
         
         if(len(listaObjetosCreados)>0):
             if(len(listaErrores)==0):
-                return returnCodes.custom_response(listaObjetosCreados, 201, "TPM-8")
+                return returnCodes.custom_response(listaObjetosCreados[0], 201, "TPM-8")
             else:
-                return returnCodes.custom_response(listaObjetosCreados, 201, "TPM-16", "",listaErrores)
+                return returnCodes.custom_response(listaObjetosCreados[0], 201, "TPM-16", "",listaErrores)
         else:
             return returnCodes.custom_response(None, 409, "TPM-16","", listaErrores)
     
