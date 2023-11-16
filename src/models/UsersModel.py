@@ -24,12 +24,19 @@ class UsersModel(db.Model):
     rolId = db.Column(
         db.Integer,db.ForeignKey("invRoles.id"),nullable=False
     )
+    proyectoId = db.Column(
+        db.Integer,db.ForeignKey("invProyectos.id"),nullable=False
+    )
 
     fechaAlta = db.Column(db.DateTime)
     fechaUltimaModificacion = db.Column(db.DateTime)
 
     rol=db.relationship(
         "RolesModel",backref=db.backref("invRoles",lazy=True)
+    )
+
+    proyecto=db.relationship(
+        "ProyectoModel",backref=db.backref("invProyectos",lazy=True)
     )
 
     def __init__(self, data):

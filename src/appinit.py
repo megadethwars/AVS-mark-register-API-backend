@@ -15,6 +15,7 @@ from .controllers.UsersView import nsUsuarios
 from .controllers.ProyectoView import nsProyecto
 from .controllers.EventosView import nsEvento
 from .controllers.StatusProyectoView import nsStatusProyecto
+from .controllers.PersonajesView import nsPersonajes
 
 
 from flask_restx import Api, fields, Resource
@@ -49,7 +50,7 @@ def create_app(env_name):
     api.add_namespace(ns=nsProyecto,path="/api/v1/proyecto")
     api.add_namespace(ns=nsStatusProyecto,path="/api/v1/statusProyecto")
     api.add_namespace(ns=nsEvento,path="/api/v1/evento")
-
+    api.add_namespace(ns=nsPersonajes,path="/api/v1/personaje")
     
     @app.errorhandler(404) 
     def not_found(e):
