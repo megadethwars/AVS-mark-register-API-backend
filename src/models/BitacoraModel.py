@@ -40,7 +40,7 @@ class BitacoraModel(db.Model):
         "UsersModel",backref=db.backref("invUsers",lazy=True)
     )
     proyecto=db.relationship(
-        "ProyectoModel",backref=db.backref("invProyectos",lazy=True)
+        "ProyectoModel",backref=db.backref("invProyectos3",lazy=True)
     )
 
     def __init__(self, data):

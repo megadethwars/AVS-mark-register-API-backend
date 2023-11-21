@@ -31,7 +31,9 @@ UsersModelApi = nsUsuarios.model(
         "password":fields.String(required=True, description="password"),
         "telefono":fields.String(required=True, description="telefono"),
         "correo":fields.String(required=True, description="correo"),
-        "rolId":fields.Integer(required=True, description="rolId")
+        "rolId":fields.Integer(required=True, description="rolId"),
+        "proyectoId":fields.String(required=True, description="proyectoId"),
+        "event":fields.String(required=True, description="event")
     }
 )
 
@@ -47,7 +49,9 @@ UsersModelQueryApi = nsUsuarios.model(
         "password":fields.String( description="password"),
         "telefono":fields.String( description="telefono"),
         "correo":fields.String( description="correo"),
-        "rolId":fields.Integer(description="rolId")
+        "rolId":fields.Integer(description="rolId"),
+        "proyectoId":fields.String(required=True, description="proyectoId"),
+        "event":fields.String(required=True, description="event")
     }
 )
 
@@ -81,14 +85,15 @@ UsersPutApi = nsUsuarios.model(
     "usersPut",
     {
         "id": fields.Integer(required=True, description="identificador"),
-        "nombre": fields.String(required=True, description="nombre"),
-        "username":fields.String(required=True, description="username"),
-        "apellidoPaterno":fields.String(required=True, description="apellidoPaterno"),
-        "apellidoMaterno":fields.String(required=True, description="apellidoMaterno"),
-        "password":fields.String(required=True, description="password"),
-        "telefono":fields.String(required=True, description="telefono"),
-        "correo":fields.String(required=True, description="correo"),
-        "rolId":fields.Integer(required=True, description="rolId")
+        "nombre": fields.String( description="nombre"),
+        "username":fields.String( description="username"),
+        "apellidoPaterno":fields.String( description="apellidoPaterno"),
+        "apellidoMaterno":fields.String( description="apellidoMaterno"),
+        "telefono":fields.String(description="telefono"),
+        "correo":fields.String(description="correo"),
+        "rolId":fields.Integer( description="rolId"),
+        "proyectoId":fields.String(description="proyectoId"),
+        "event":fields.String( description="event")
         
     }
 )
@@ -293,7 +298,6 @@ class OneCatalogo(Resource):
         return returnCodes.custom_response(serialized_user, 200, "TPM-3")
 
 @nsUsuarios.route("/query")
-
 @nsUsuarios.response(404, "usuario no encontrado")
 class UserQuery(Resource):
     
@@ -328,3 +332,5 @@ class UserQuery(Resource):
 
         serialized_device = usuarios_schema.dump(devices.items,many=True)
         return returnCodes.custom_response(serialized_device, 200, "TPM-3")
+
+#asignar usuarios a un cierto evento

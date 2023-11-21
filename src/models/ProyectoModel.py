@@ -22,7 +22,6 @@ class ProyectoModel(db.Model):
     proyecto = db.Column(db.Text)
     fechaAlta = db.Column(db.DateTime)
     fechaUltimaModificacion = db.Column(db.DateTime)
-    IDEvento = db.Column(db.String(100),unique=True)
     StatusProyecto=db.relationship(
         "StatusProyectoModel",backref=db.backref("invStatusProyecto",lazy=True)
     )
@@ -33,7 +32,6 @@ class ProyectoModel(db.Model):
         """
         self.StatusProyectoId = data.get("StatusProyectoId")
         self.proyecto= data.get("proyecto")
-        self.IDEvento = data.get("IDEvento")
         self.fechaAlta = datetime.datetime.utcnow()
         self.fechaUltimaModificacion = datetime.datetime.utcnow()
 
@@ -58,6 +56,10 @@ class ProyectoModel(db.Model):
     @staticmethod
     def get_one_project(id):
         return ProyectoModel.query.get(id)
+    
+    @staticmethod
+    def get_one_project_by_nombre(nombre):
+        return ProyectoModel.query.filter(ProyectoModel.proyecto==nombre).first()
     
     @staticmethod
     def get_all_projects_by_like(value,offset=1,limit=10):

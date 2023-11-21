@@ -17,12 +17,10 @@ nsEvento = api.namespace("evento", description="API operations for evento api")
 EventoModelApi = nsEvento.model(
     "EventoModel",
     {
-        "IDEvento" : fields.String(required=True, description="IDEvento"),
+        
         "AliasEvento" : fields.String(required=True, description="AliasEvento"),
-        "activo" : fields.String(required=True, description="activo"),
-        "fechaAlta" : fields.String(required=True, description="fechaAlta"),
-        "fechaUltimaModificacion" : fields.String(required=True, description="fechaUltimaModificacion"),
-        "ProyectoId" : fields.String(required=True, description="ProyectoId")
+        "activo" : fields.Boolean(required=True, description="activo"),
+        "ProyectoId" : fields.Integer(required=True, description="ProyectoId")
     }
 )
 
@@ -33,8 +31,8 @@ EventoPutApi = nsEvento.model(
         "id" : fields.String(required=True, description="id"),
         "IDEvento" : fields.String(required=True, description="IDEvento"),
         "AliasEvento" : fields.String(required=True, description="AliasEvento"),
-        "activo" : fields.String(required=True, description="activo"),
-        "ProyectoId" : fields.String(required=True, description="ProyectoId")
+        "activo" : fields.Boolean(required=True, description="activo"),
+        "ProyectoId" : fields.Integer(required=True, description="ProyectoId")
 
     }
 )
@@ -58,6 +56,16 @@ def createEvento(req_data, listaObjetosCreados, listaErrores):
         error = returnCodes.partial_response("TPM-5","",data.get("ProyectoId"))
         listaErrores.append(error)
         return returnCodes.custom_response(None, 409, "TPM-5", "", data.get("ProyectoId"))
+    
+    evt=""
+    last_event = EventoModel.get_last_event()
+    if not last_event:
+        #create first
+        evt = "0000000001"
+    else:
+        evt = int(last_event.IDEvento)
+        evt =str(evt).zfill(10)
+    data['IDEvento']=evt
 
     Evento = EventoModel(data)
 

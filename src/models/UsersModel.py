@@ -52,6 +52,7 @@ class UsersModel(db.Model):
         self.correo =data.get('correo') 
         self.rolId = data.get("rolId")
         self.event = data.get("event")
+        self.proyectoId = data.get("proyectoId")
         self.fechaAlta = datetime.datetime.utcnow()
         self.fechaUltimaModificacion = datetime.datetime.utcnow()
 
@@ -112,9 +113,10 @@ class UsuariosSchema(Schema):
     telefono = fields.Str(required=True, validate=[validate.Length(max=45)])
     correo =fields.Str(required=True, validate=[validate.Length(max=100)])
     rolId = fields.Integer(required=True)
+    proyectoId = fields.Integer(required=True)
     rol=fields.Nested(RolesSchema)
     fechaAlta = fields.DateTime()
-    event = fields.Str(required=True, validate=[validate.Length(max=45)])
+    event = fields.Str(validate=[validate.Length(max=45)])
     fechaUltimaModificacion = fields.DateTime()
 
 
@@ -148,6 +150,7 @@ class UsuariosSchemaUpdate(Schema):
     fechaAlta = fields.DateTime()
     event = fields.Str(required=True, validate=[validate.Length(max=45)])
     fechaUltimaModificacion = fields.DateTime()
+    proyectoId = fields.Integer()
 
 class UsuariosSchemaQuery(Schema):
     """
@@ -161,6 +164,7 @@ class UsuariosSchemaQuery(Schema):
     telefono = fields.Str( validate=[validate.Length(max=45)])
     correo =fields.Str( validate=[validate.Length(max=100)])
     rolId = fields.Integer()
-    event = fields.Str(required=True, validate=[validate.Length(max=45)])
+    event = fields.Str(validate=[validate.Length(max=45)])
+    proyectoId = fields.Integer()
     
    

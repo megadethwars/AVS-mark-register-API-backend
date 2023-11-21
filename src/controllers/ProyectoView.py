@@ -29,7 +29,6 @@ ProyectoQueryModel = nsProyecto.model(
         "id": fields.Integer(description="identificador"),
         "StatusProyectoId" : fields.Integer(description="StatusProyectoId"),
         "proyecto" : fields.String(description="proyecto"),
-        "IDEvento" : fields.String( description="IDEvento"),
         "fechaAltaRangoInicio":fields.String( description="foto"),
         "fechaAltaRangoFin":fields.String( description="foto")
 
@@ -42,10 +41,9 @@ ProyectoModelApi = nsProyecto.model(
     "Proyecto",
     {
 
-        "id": fields.Integer(description="identificador"),
+     
         "StatusProyectoId" : fields.Integer(description="StatusProyectoId"),
-        "proyecto" : fields.String(description="proyecto"),
-        "IDEvento" : fields.String( description="IDEvento")
+        "proyecto" : fields.String(description="proyecto")
 
     }
 )
@@ -56,8 +54,7 @@ ProyectoPatchApi = nsProyecto.model(
     {
         "id": fields.Integer(description="identificador"),
         "StatusProyectoId" : fields.Integer(description="StatusProyectoId"),
-        "proyecto" : fields.String(description="proyecto"),
-        "IDEvento" : fields.String( description="IDEvento")
+        "proyecto" : fields.String(description="proyecto")
         
     }
 )
@@ -78,7 +75,14 @@ def createProyecto(req_data, listaObjetosCreados, listaErrores):
         #error = returnCodes.custom_response(None, 409, "TPM-5", "", data.get("nombre")).json
         error = returnCodes.partial_response("TPM-4","",data.get("StatusProyectoId"))
         listaErrores.append(error)
-        return returnCodes.custom_response(None, 409, "TPM-4", "", data.get("StatusProyectoId"))
+        return returnCodes.custom_response(None, 404, "TPM-4", "", data.get("StatusProyectoId"))
+    
+    proyecto_in_db = ProyectoModel.get_one_project_by_nombre(data.get("proyecto"))
+    if  proyecto_in_db:
+        #error = returnCodes.custom_response(None, 409, "TPM-5", "", data.get("nombre")).json
+        error = returnCodes.partial_response("TPM-5","",data.get("proyecto"))
+        listaErrores.append(error)
+        return returnCodes.custom_response(None, 409, "TPM-5", "", data.get("proyecto"))
 
     proyecto = ProyectoModel(data)
 
@@ -162,7 +166,7 @@ class ProyectoList(Resource):
         if not proyecto:
             return returnCodes.custom_response(None, 404, "TPM-4","el proyecto no existe")
         if "StatusProyectoId" in data:
-            device_in_db = DispositivosModel.get_one_device(data.get("StatusProyectoId"))
+            device_in_db = StatusProyectoModel.get_one_status(data.get("StatusProyectoId"))
             if not device_in_db:
                 #error = returnCodes.custom_response(None, 409, "TPM-5", "", data.get("nombre")).json
                 

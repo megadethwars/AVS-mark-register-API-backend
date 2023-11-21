@@ -3,7 +3,7 @@ from marshmallow import fields, Schema, validate
 import datetime
 from . import db
 from .ProyectoModel import ProyectoSchema
-
+from sqlalchemy import Date,cast
 class EventoModel(db.Model):
     """
     Evento Model
@@ -55,6 +55,10 @@ class EventoModel(db.Model):
     @staticmethod
     def get_one_evento(id):
         return EventoModel.query.get(id)
+    
+    @staticmethod
+    def get_last_event():
+        return  db.session.query(EventoModel).order_by(EventoModel.IDEvento.desc()).first()
 
     @staticmethod
     def get_evento_by_nombre(value):
@@ -64,6 +68,26 @@ class EventoModel(db.Model):
     def get_evento_by_like(value,offset,limit):
         return EventoModel.query.with_entities(EventoModel.id).filter(EventoModel.IDEvento.ilike(f'%{value}%') ).order_by(EventoModel.id).paginate(page=offset,per_page=limit,error_out=False)
 
+    @staticmethod
+    def get_events_by_query(jsonFiltros,offset=1,limit=5):
+
+        if "fechaAltaRangoInicio" in jsonFiltros and "fechaAltaRangoFin" in jsonFiltros:
+            alta = jsonFiltros["fechaAltaRangoInicio"]
+            end = jsonFiltros["fechaAltaRangoFin"]
+            del jsonFiltros["fechaAltaRangoInicio"]
+            del jsonFiltros["fechaAltaRangoFin"]
+            alta = alta+" 00:00:00.000"
+            end = end + " 23:59:59.999"
+            return EventoModel.query.filter_by(**jsonFiltros).filter(EventoModel.fechaAlta >= alta).filter(EventoModel.fechaAlta <= end).order_by(EventoModel.id).paginate(page=offset,per_page=limit,error_out=False)
+        
+        elif "fechaAltaRangoInicio" in jsonFiltros:
+            alta = jsonFiltros["fechaAltaRangoInicio"]
+            del jsonFiltros["fechaAltaRangoInicio"]
+            return EventoModel.query.filter_by(**jsonFiltros).filter(cast(EventoModel.fechaAlta,Date) == alta).order_by(EventoModel.id).paginate(page=offset,per_page=limit,error_out=False)
+        
+        else:
+            return EventoModel.query.filter_by(**jsonFiltros).order_by(EventoModel.id).paginate(page=offset,per_page=limit,error_out=False)
+
     def __repr(self):
         return '<id {}>'.format(self.id)
 
@@ -72,11 +96,11 @@ class EventosSchema(Schema):
     evento Schema
     """
     id = fields.Int()
-    IDEvento = fields.Str(required=True, validate=[validate.Length(max=100)])
+    IDEvento = fields.Str(validate=[validate.Length(max=100)])
     AliasEvento = fields.Str(validate=[validate.Length(max=100)])
     fechaAlta = fields.DateTime()
     fechaUltimaModificacion = fields.DateTime()
-    activo = fields.Boolean()
+    activo = fields.Boolean(required=True)
     evento = fields.Nested(ProyectoSchema)
 
 

@@ -7,6 +7,7 @@ from sqlalchemy import true
 from ..models.ProyectoModel import ProyectoModel,ProyectoSchema,ProyectoSchemaUpdate,ProyectosSchemaQuery
 from ..models.BitacoraModel import BitacoraModel,BitacoraSchema,BitacoraSchemaQuery
 from ..models.UsersModel import UsersModel
+from ..models.EventoModel import EventoModel
 from ..models import db
 from ..shared import returnCodes
 from flask_restx import Api,fields,Resource,reqparse
@@ -96,6 +97,19 @@ def createBitacora(req_data, listaObjetosCreados, listaErrores):
         error = returnCodes.partial_response("TPM-4","",data.get("usuarioId"))
         listaErrores.append(error)
         return returnCodes.custom_response(None, 409, "TPM-4", "", data.get("usuarioId"))
+    
+    #check evento
+    evento_in_db = EventoModel.get_evento_by_nombre(data.get("IDEvento"))
+    if not evento_in_db:
+        error = returnCodes.partial_response("TPM-4","",data.get("IDEvento"))
+        listaErrores.append(error)
+        return returnCodes.custom_response(None, 409, "TPM-4", "", data.get("IDEvento"))
+    if evento_in_db.activo is False:
+        error = returnCodes.partial_response("TPM-20","",data.get("IDEvento"))
+        listaErrores.append(error)
+        return returnCodes.custom_response(None, 409, "TPM-20", "", data.get("IDEvento"))
+
+
 
     bitacora = BitacoraModel(data)
 
