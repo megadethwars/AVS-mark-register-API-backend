@@ -5,7 +5,7 @@ from marshmallow import ValidationError
 from sqlalchemy import true
 
 from ..models.ProyectoModel import ProyectoModel,ProyectoSchema,ProyectoSchemaUpdate,ProyectosSchemaQuery
-from ..models.BitacoraModel import BitacoraModel,BitacoraSchema,BitacoraSchemaQuery
+from ..models.BitacoraModel import BitacoraModel,BitacoraSchema,BitacoraSchemaQuery,BitacoraSchemaUpdate
 from ..models.UsersModel import UsersModel
 from ..models.EventoModel import EventoModel
 from ..models import db
@@ -17,9 +17,9 @@ parser = reqparse.RequestParser()
 parser.add_argument('limit', type=int, location='args')
 parser.add_argument('offset', type=int, location='args')
 bitacora_api = Blueprint("bitacora_api", __name__)
-bitacora_schema = ProyectoSchema()
-bitacora_schema_update = ProyectoSchemaUpdate()
-bitacora_schema_query = ProyectosSchemaQuery()
+bitacora_schema = BitacoraSchema()
+bitacora_schema_update = BitacoraSchemaUpdate()
+bitacora_schema_query = BitacoraSchemaQuery()
 api = Api(bitacora_api)
 
 nsBitacora = api.namespace("bitacora", description="API operations for bitacora")
@@ -75,43 +75,37 @@ BitacoraPatchApi = nsBitacora.model(
 
 def createBitacora(req_data, listaObjetosCreados, listaErrores):
     #app.logger.info("Creando catalogo" + json.dumps(req_data))
-    data = None
-    try:
-        data = bitacora_schema.load(req_data)
-    except ValidationError as err:
-        #error = returnCodes.custom_response(None, 400, "TPM-2", str(err)).json
-        error = returnCodes.partial_response("TPM-2",str(err))
-        listaErrores.append(error)
-        return returnCodes.custom_response(None, 400, "TPM-2", str(err))
 
-    proyecto_in_db = ProyectoModel.get_one_project(data.get("proyectId"))
+
+
+    proyecto_in_db = ProyectoModel.get_one_project(req_data.get("proyectId"))
     if not proyecto_in_db:
         #error = returnCodes.custom_response(None, 409, "TPM-5", "", data.get("nombre")).json
-        error = returnCodes.partial_response("TPM-4","",data.get("proyectId"))
+        error = returnCodes.partial_response("TPM-4","",req_data.get("proyectId"))
         listaErrores.append(error)
-        return returnCodes.custom_response(None, 409, "TPM-4", "", data.get("proyectId"))
+        return returnCodes.custom_response(None, 409, "TPM-4", "", req_data.get("proyectId"))
 
-    user_in_db = UsersModel.get_one_users(data.get("usuarioId"))
+    user_in_db = UsersModel.get_one_users(req_data.get("usuarioId"))
     if not user_in_db:
         #error = returnCodes.custom_response(None, 409, "TPM-5", "", data.get("nombre")).json
-        error = returnCodes.partial_response("TPM-4","",data.get("usuarioId"))
+        error = returnCodes.partial_response("TPM-4","",req_data.get("usuarioId"))
         listaErrores.append(error)
-        return returnCodes.custom_response(None, 409, "TPM-4", "", data.get("usuarioId"))
+        return returnCodes.custom_response(None, 409, "TPM-4", "", req_data.get("usuarioId"))
     
     #check evento
-    evento_in_db = EventoModel.get_evento_by_nombre(data.get("IDEvento"))
+    evento_in_db = EventoModel.get_evento_by_nombre(req_data.get("IDEvento"))
     if not evento_in_db:
-        error = returnCodes.partial_response("TPM-4","",data.get("IDEvento"))
+        error = returnCodes.partial_response("TPM-4","",req_data.get("IDEvento"))
         listaErrores.append(error)
-        return returnCodes.custom_response(None, 409, "TPM-4", "", data.get("IDEvento"))
+        return returnCodes.custom_response(None, 409, "TPM-4", "", req_data.get("IDEvento"))
     if evento_in_db.activo is False:
-        error = returnCodes.partial_response("TPM-20","",data.get("IDEvento"))
+        error = returnCodes.partial_response("TPM-20","",req_data.get("IDEvento"))
         listaErrores.append(error)
-        return returnCodes.custom_response(None, 409, "TPM-20", "", data.get("IDEvento"))
+        return returnCodes.custom_response(None, 409, "TPM-20", "", req_data.get("IDEvento"))
 
 
 
-    bitacora = BitacoraModel(data)
+    bitacora = BitacoraModel(req_data)
 
     try:
         bitacora.save()
@@ -129,7 +123,7 @@ def createBitacora(req_data, listaObjetosCreados, listaErrores):
     return returnCodes.custom_response(serialized_bitacora, 201, "TPM-1")
 
 @nsBitacora.route("")
-class ProyectoList(Resource):
+class BitacoraList(Resource):
     @nsBitacora.doc("lista de proyectos")
     @nsBitacora.expect(parser)
     def get(self):

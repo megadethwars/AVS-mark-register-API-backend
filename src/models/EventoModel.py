@@ -33,6 +33,7 @@ class EventoModel(db.Model):
         self.AliasEvento = data.get("AliasEvento")
         self.fechaUltimaModificacion = datetime.datetime.utcnow()
         self.activo = data.get("activo")
+        self.ProyectoId = data.get("ProyectoId")
 
     def save(self):
         db.session.add(self)
@@ -102,6 +103,7 @@ class EventosSchema(Schema):
     fechaUltimaModificacion = fields.DateTime()
     activo = fields.Boolean(required=True)
     evento = fields.Nested(ProyectoSchema)
+    ProyectoId = fields.Int(required=True)
 
 
 class EventosSchemaUpdate(Schema):
@@ -114,3 +116,4 @@ class EventosSchemaUpdate(Schema):
     fechaAlta = fields.DateTime()
     fechaUltimaModificacion = fields.DateTime()
     activo = fields.Boolean()
+    ProyectoId = fields.Int()

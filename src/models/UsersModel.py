@@ -2,7 +2,7 @@
 from marshmallow import fields, Schema, validate
 import datetime
 from .RolesModel import RolesSchema
-from sqlalchemy import true
+from sqlalchemy import true,update
 from . import db
 from sqlalchemy import or_
 class UsersModel(db.Model):
@@ -93,7 +93,15 @@ class UsersModel(db.Model):
     def get_users_by_query(jsonFiltros,offset=1,limit=100):
         return UsersModel.query.filter_by(**jsonFiltros).order_by(UsersModel.id).paginate(page=offset,per_page=limit,error_out=False) 
     
-    staticmethod
+    @staticmethod
+    def update_all_users(data,proyectId,eventId):
+        stmt = update(UsersModel).where(
+        (UsersModel.id.in_([d["id"] for d in data]))).values(proyectoId=proyectId,event=eventId)
+        db.session.execute(stmt)
+        db.session.commit()
+        return "OK"
+
+    @staticmethod
     def get_user_by_params_like_entity(value,offset,limit):
         return UsersModel.query.with_entities(UsersModel.id).filter(or_(UsersModel.username.ilike(f'%{value}%'),UsersModel.nombre.ilike(f'%{value}%') , UsersModel.apellidoPaterno.ilike(f'%{value}%') , UsersModel.apellidoMaterno.ilike(f'%{value}%')) ).order_by(UsersModel.id).paginate(page=offset,per_page=limit,error_out=False)
 
@@ -167,4 +175,7 @@ class UsuariosSchemaQuery(Schema):
     event = fields.Str(validate=[validate.Length(max=45)])
     proyectoId = fields.Integer()
     
-   
+class UsuariosEvent(Schema):
+    id = fields.Int(required=True)
+    event = fields.Str(required=True, validate=[validate.Length(max=45)])
+    proyectoId = fields.Integer(required=True)

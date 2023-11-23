@@ -47,7 +47,7 @@ class BitacoraModel(db.Model):
         """
         Class constructor
         """
-        self.proyectId = data.get("dispositivoId")
+        self.proyectId = data.get("proyectId")
         self.usuarioId = data.get("usuarioId")
         self.comentario = data.get("comentario")
         self.fechaInicio = data.get("fechaInicio")
@@ -106,8 +106,9 @@ class BitacoraSchema(Schema):
     Catalogo Schema
     """
     id = fields.Int()
-    dispositivoId = fields.Integer(required=True)
+    proyectId = fields.Integer()
     usuarioId = fields.Integer(required=True)
+    IDEvento = fields.Str(required=True)
     comentario = fields.Str(required=True)
     isVentana = fields.Bool()
     proyecto = fields.Nested(ProyectoSchema)
@@ -122,6 +123,7 @@ class BitacoraSchemaUpdate(Schema):
     Catalogo Schema
     """
     id = fields.Int(required=True)
+    IDEvento = fields.Str()
     proyectId = fields.Integer()
     usuarioId = fields.Integer()
     comentario = fields.Str()
@@ -138,6 +140,7 @@ class BitacoraSchemaQuery(Schema):
     Catalogo Schema
     """
     id = fields.Int()
+    IDEvento = fields.Str()
     proyectId = fields.Integer()
     usuarioId = fields.Integer()
     comentario = fields.Str()

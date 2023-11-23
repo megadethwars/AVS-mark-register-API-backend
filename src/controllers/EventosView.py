@@ -51,7 +51,7 @@ def createEvento(req_data, listaObjetosCreados, listaErrores):
 
     # Aquí hacemos las validaciones para ver si el catalogo de negocio ya existe previamente
     proyecto_in_db = ProyectoModel.get_one_project(data.get("ProyectoId"))
-    if proyecto_in_db:
+    if  not proyecto_in_db:
         #error = returnCodes.custom_response(None, 409, "TPM-5", "", data.get("nombre")).json
         error = returnCodes.partial_response("TPM-5","",data.get("ProyectoId"))
         listaErrores.append(error)
@@ -61,10 +61,10 @@ def createEvento(req_data, listaObjetosCreados, listaErrores):
     last_event = EventoModel.get_last_event()
     if not last_event:
         #create first
-        evt = "0000000001"
+        evt = "00000001"
     else:
-        evt = int(last_event.IDEvento)
-        evt =str(evt).zfill(10)
+        evt = int(last_event.IDEvento)+1
+        evt =str(evt).zfill(8)
     data['IDEvento']=evt
 
     Evento = EventoModel(data)

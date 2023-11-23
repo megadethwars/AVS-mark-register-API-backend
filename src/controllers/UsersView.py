@@ -2,7 +2,7 @@
 
 from flask import Flask, request, json, Response, Blueprint, g
 from marshmallow import ValidationError
-from ..models.UsersModel import UsersModel, UsuariosSchema,UsuariosSchemaUpdate,UsuarioLoginSchema,UsuarioLoginUpdateSchema, UsuariosSchemaQuery
+from ..models.UsersModel import UsersModel, UsuariosSchema,UsuariosSchemaUpdate,UsuarioLoginSchema,UsuarioLoginUpdateSchema, UsuariosSchemaQuery,UsuariosEvent
 from ..models.RolesModel import RolesModel
 from ..models import db
 from ..shared import returnCodes
@@ -16,6 +16,7 @@ usuarios_schema_update = UsuariosSchemaUpdate()
 user_auth = UsuarioLoginSchema()
 user_pass_update = UsuarioLoginUpdateSchema()
 usuarios_schema_query = UsuariosSchemaQuery()
+usuario_event_schema = UsuariosEvent()
 api = Api(Usuario_api)
 
 nsUsuarios = api.namespace("users", description="API operations for usuarios")
@@ -32,6 +33,16 @@ UsersModelApi = nsUsuarios.model(
         "telefono":fields.String(required=True, description="telefono"),
         "correo":fields.String(required=True, description="correo"),
         "rolId":fields.Integer(required=True, description="rolId"),
+        "proyectoId":fields.String(required=True, description="proyectoId"),
+        "event":fields.String(required=True, description="event")
+    }
+)
+
+UsersModelEventApi = nsUsuarios.model(
+    "usuariosEvent",
+    {
+     
+        "id": fields.Integer(required=True, description="identificador"),
         "proyectoId":fields.String(required=True, description="proyectoId"),
         "event":fields.String(required=True, description="event")
     }
@@ -78,7 +89,7 @@ UsersModelLoginpassUpdateApi = nsUsuarios.model(
 )
 
 UsersModelListApi = nsUsuarios.model('usersList', {
-    'userslist': fields.List(fields.Nested(UsersModelApi)),
+    'userslist': fields.List(fields.Nested(UsersModelEventApi)),
 })
 
 UsersPutApi = nsUsuarios.model(
@@ -296,6 +307,35 @@ class OneCatalogo(Resource):
 
         serialized_user = usuarios_schema.dump(rol)
         return returnCodes.custom_response(serialized_user, 200, "TPM-3")
+
+
+@nsUsuarios.route("/changeEvent")
+@nsUsuarios.response(404, "usuario no encontrado")
+class UserEvent(Resource):
+    @nsUsuarios.doc("actualizar usuarios")
+    @nsUsuarios.expect(UsersModelListApi)
+    def put(self):
+        if request.is_json is False:
+            return returnCodes.custom_response(None, 400, "TPM-2")
+        req_data = request.json
+        data = None
+        if(not req_data):
+            return returnCodes.custom_response(None, 400, "TPM-2")
+        try:
+            data = usuario_event_schema.load(req_data, partial=True,many=True)
+        except ValidationError as err:
+            return returnCodes.custom_response(None, 400, "TPM-2", str(err))
+
+
+        
+        try:
+            data[0]['proyectoId']
+            UsersModel.update_all_users(data,data[0]['proyectoId'],data[0]['event'])
+        except Exception as err:
+            return returnCodes.custom_response(None, 500, "TPM-7", str(err))
+        status={"status":"actualizado correctamente"}
+        #serialized_status = usuarios_schema.dump(status)
+        return returnCodes.custom_response(status, 200, "TPM-6")
 
 @nsUsuarios.route("/query")
 @nsUsuarios.response(404, "usuario no encontrado")
