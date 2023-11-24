@@ -4,6 +4,7 @@ from flask import Flask, request, json, Response, Blueprint, g
 from marshmallow import ValidationError
 from ..models.PersonajesModel import PersonajesModel, PersonajesSchema
 from ..models import db
+from ..models.BitacoraModel import BitacoraModel
 from ..shared import returnCodes
 from flask_restx import Api,fields,Resource
 
@@ -17,14 +18,15 @@ nsPersonajes = api.namespace("personajes", description="API operations for perso
 PersonajesModelApi = nsPersonajes.model(
     "PersonajesModel",
     {
-        "comentarioId":fields.String(required=True, description="comentarioId"),
+        "comentarioId":fields.Integer(required=True, description="comentarioId"),
         "personaje": fields.String(required=True, description="personaje")
     }
 )
 
-PersonajesModelListApi = nsPersonajes.model('PersonajesList', {
-    "comentarioId":fields.String(required=True, description="comentarioId"),
-    'personaje': fields.List(fields.Nested(PersonajesModelApi)),
+
+
+PersonajesModelListApi = nsPersonajes.model('personajesList', {
+    'personajesList': fields.List(fields.Nested(PersonajesModelApi)),
 })
 
 PersonajesPatchApi = nsPersonajes.model(
@@ -151,3 +153,30 @@ class OneCatalogo(Resource):
 
         serialized_personaje = personajes_schema.dump(personaje)
         return returnCodes.custom_response(serialized_personaje, 200, "TPM-3")
+
+
+@nsPersonajes.route("/bulkInsert")
+@nsPersonajes.response(404, "usuario no encontrado")
+@nsPersonajes.response(201, "creados correctamente")
+class BulkInsert(Resource):
+    @nsPersonajes.doc("obtener varios personajes")
+    @api.expect(PersonajesModelListApi)
+    def post(self):
+        
+
+        req_data = request.json
+        data = None
+        if(not req_data):
+            return returnCodes.custom_response(None, 400, "TPM-2")
+        try:
+            data = personajes_schema.load(req_data, partial=True,many=True)
+        except ValidationError as err:
+            return returnCodes.custom_response(None, 400, "TPM-2", str(err))
+        
+        devices = BitacoraModel.get_one_Bitacora(data[0]['comentarioId'])
+        if not devices:
+            return returnCodes.custom_response(None, 404, "TPM-4","COMENTARIO NO encontrado")
+
+        devices = PersonajesModel.bulk_insert(data)
+
+        return returnCodes.custom_response({"status":"insertados correctamente"}, 200, "TPM-3")

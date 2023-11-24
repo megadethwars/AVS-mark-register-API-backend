@@ -326,8 +326,6 @@ class UserEvent(Resource):
         except ValidationError as err:
             return returnCodes.custom_response(None, 400, "TPM-2", str(err))
 
-
-        
         try:
             data[0]['proyectoId']
             UsersModel.update_all_users(data,data[0]['proyectoId'],data[0]['event'])
@@ -372,5 +370,6 @@ class UserQuery(Resource):
 
         serialized_device = usuarios_schema.dump(devices.items,many=True)
         return returnCodes.custom_response(serialized_device, 200, "TPM-3")
+
 
 #asignar usuarios a un cierto evento

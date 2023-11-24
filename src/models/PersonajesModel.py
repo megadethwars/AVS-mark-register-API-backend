@@ -46,6 +46,11 @@ class PersonajesModel(db.Model):
         return PersonajesModel.query.all()
     
     @staticmethod
+    def bulk_insert(data):
+        db.session.bulk_insert_mappings(PersonajesModel, data)
+        db.session.commit()
+    
+    @staticmethod
     def get_one_personaje(id):
         return PersonajesModel.query.get(id)
 
