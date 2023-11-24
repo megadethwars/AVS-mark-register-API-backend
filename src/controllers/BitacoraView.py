@@ -3,7 +3,7 @@
 from flask import Flask, request, json, Response, Blueprint, g
 from marshmallow import ValidationError
 from sqlalchemy import true
-
+from flask import send_file
 from ..models.ProyectoModel import ProyectoModel,ProyectoSchema,ProyectoSchemaUpdate,ProyectosSchemaQuery
 from ..models.BitacoraModel import BitacoraModel,BitacoraSchema,BitacoraSchemaQuery,BitacoraSchemaUpdate
 from ..models.UsersModel import UsersModel
@@ -11,6 +11,8 @@ from ..models.EventoModel import EventoModel
 from ..models import db
 from ..shared import returnCodes
 from flask_restx import Api,fields,Resource,reqparse
+from io import BytesIO
+import csv
 
 app = Flask(__name__)
 parser = reqparse.RequestParser()
@@ -286,3 +288,58 @@ class BitacoraFilter(Resource):
 
         serialized_bitacora = bitacora_schema.dump(bitacoras.items,many=True)
         return returnCodes.custom_response(serialized_bitacora, 200, "TPM-3")
+    
+
+@nsBitacora.route("/csv")
+@nsBitacora.expect(parser)
+@nsBitacora.response(404, "bitacora no encontrada")
+class bitacoraCSV(Resource):
+    
+    @nsBitacora.doc("obtener varias bitacoras")
+    @api.expect(BitacoraQueryModel)
+    def post(self):
+        
+        if request.is_json is False:
+            return returnCodes.custom_response(None, 400, "TPM-2")
+
+        req_data = request.json
+        data = None
+        if(not req_data):
+            return returnCodes.custom_response(None, 400, "TPM-2")
+        try:
+            data = bitacora_schema_query.load(req_data, partial=True)
+        except ValidationError as err:
+            return returnCodes.custom_response(None, 400, "TPM-2", str(err))
+
+        devices = BitacoraModel.get_Bitacora_by_query_csv(data)
+        if not devices:
+            return returnCodes.custom_response(None, 404, "TPM-4")
+        
+        headers = ["fechainicio", "comentario", "fechafin"]
+        data_list = [
+            {"fechainicio": "2022-09-01 15:30:00", "comentario": "string1", "fechafin": "2022-09-02 15:30:00"},
+            {"fechainicio": "2022-09-03 15:30:00", "comentario": "string2", "fechafin": "2022-09-04 15:30:00"}
+        ]
+
+        # Crear un archivo CSV en memoria
+        csv_data = BytesIO()
+        # Escribir las cabeceras en el CSV (codificadas como bytes)
+        csv_data.write(','.join(headers).encode('utf-8') + b'\n')
+
+        # Escribir los datos en el CSV
+        for row in data_list:
+            # Convertir las cadenas a bytes antes de escribirlas
+            csv_data.write(','.join(str(value) for value in row.values()).encode('utf-8') + b'\n')
+
+        # Configurar el cursor al principio del archivo
+        csv_data.seek(0)
+
+        return send_file(
+            csv_data,
+            mimetype='text/csv',
+            as_attachment=True,
+            download_name='bitacora.csv'
+        )
+
+        #serialized_bitacora = bitacora_schema.dump(devices,many=true)
+        #return returnCodes.custom_response(serialized_bitacora, 200, "TPM-3")

@@ -97,6 +97,26 @@ class BitacoraModel(db.Model):
         
         else:
             return BitacoraModel.query.filter_by(**jsonFiltros).order_by(BitacoraModel.id).paginate(page=offset,per_page=limit,error_out=False)
+        
+
+    def get_Bitacora_by_query_csv(jsonFiltros):
+        
+        if "fechaAltaRangoInicio" in jsonFiltros and "fechaAltaRangoFin" in jsonFiltros:
+            alta = jsonFiltros["fechaAltaRangoInicio"]
+            end = jsonFiltros["fechaAltaRangoFin"]
+            del jsonFiltros["fechaAltaRangoInicio"]
+            del jsonFiltros["fechaAltaRangoFin"]
+            alta = alta+" 00:00:00.000"
+            end = end + " 23:59:59.999"
+            return BitacoraModel.query.filter_by(**jsonFiltros).filter(BitacoraModel.fechaAlta >= alta).filter(BitacoraModel.fechaAlta <= end).order_by(BitacoraModel.id)
+        
+        elif "fechaAltaRangoInicio" in jsonFiltros:
+            alta = jsonFiltros["fechaAltaRangoInicio"]
+            del jsonFiltros["fechaAltaRangoInicio"]
+            return BitacoraModel.query.filter_by(**jsonFiltros).filter(cast(BitacoraModel.fechaAlta,Date) == alta).order_by(BitacoraModel.id)
+        
+        else:
+            return BitacoraModel.query.filter_by(**jsonFiltros).order_by(BitacoraModel.id)
 
     def __repr(self):
         return '<id {}>'.format(self.id)
