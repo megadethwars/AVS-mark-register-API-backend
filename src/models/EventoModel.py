@@ -53,6 +53,11 @@ class EventoModel(db.Model):
     def get_all_eventos():
         return EventoModel.query.all()
 
+
+    @staticmethod
+    def get_all_active_eventos(offset,limit):
+        return EventoModel.query.filter(EventoModel.activo==True).order_by(EventoModel.id).paginate(page=offset,per_page=limit,error_out=False)
+
     @staticmethod
     def get_one_evento(id):
         return EventoModel.query.get(id)
@@ -122,3 +127,12 @@ class EventosSchemaUpdate(Schema):
     fechaUltimaModificacion = fields.DateTime()
     activo = fields.Boolean()
     ProyectoId = fields.Int()
+
+class EventosSchemaDumpAll(Schema):
+    """
+    evento Schema
+    """
+    id = fields.Int()
+    IDEvento = fields.Str(validate=[validate.Length(max=100)])
+    AliasEvento = fields.Str(validate=[validate.Length(max=100)])
+    

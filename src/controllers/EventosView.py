@@ -4,12 +4,13 @@ from marshmallow import ValidationError
 from ..shared import returnCodes
 from flask_restx import Api,fields,Resource
 from ..models.ProyectoModel import ProyectoModel
-from ..models.EventoModel import EventoModel,EventosSchema,EventosSchemaUpdate
+from ..models.EventoModel import EventoModel,EventosSchema,EventosSchemaUpdate,EventosSchemaDumpAll
 from ..models import db
 app = Flask(__name__)
 Evento_api = Blueprint("evento_api", __name__)
 Evento_schema = EventosSchema()
 Evento_schema_update = EventosSchemaUpdate()
+evento_schema_dump= EventosSchemaDumpAll()
 api = Api(Evento_api)
 
 nsEvento = api.namespace("evento", description="API operations for evento api")
@@ -170,4 +171,28 @@ class OneEvento(Resource):
             return returnCodes.custom_response(None, 404, "TPM-4")
 
         serialized_evento = Evento_schema.dump(evento)
+        return returnCodes.custom_response(serialized_evento, 200, "TPM-3")
+
+
+@nsEvento.route("/allActive")
+@nsEvento.response(404, "bitacora no encontrada")
+class EventoAllActives(Resource):
+    
+    @nsEvento.doc("obtener todos los eventos activos")
+    def get(self):
+        offset = 1
+        limit = 100
+
+        if "offset" in request.args:
+            offset = request.args.get('offset',default = 1, type = int)
+
+        if "limit" in request.args:
+            limit = request.args.get('limit',default = 100, type = int)
+
+
+        eventos = EventoModel.get_all_active_eventos(offset,limit)
+        if not eventos:
+            return returnCodes.custom_response(None, 404, "TPM-4")
+
+        serialized_evento = evento_schema_dump.dump(eventos.items,many=True)
         return returnCodes.custom_response(serialized_evento, 200, "TPM-3")
