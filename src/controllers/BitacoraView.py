@@ -12,6 +12,7 @@ from ..models import db
 from ..shared import returnCodes
 from flask_restx import Api,fields,Resource,reqparse
 from io import BytesIO
+from io import StringIO
 import csv
 
 app = Flask(__name__)
@@ -95,7 +96,7 @@ def createBitacora(req_data, listaObjetosCreados, listaErrores):
         return returnCodes.custom_response(None, 409, "TPM-4", "", req_data.get("usuarioId"))
     
     #check evento
-    evento_in_db = EventoModel.get_evento_by_nombre(req_data.get("IDEvento"))
+    evento_in_db = EventoModel.get_evento_by_nombre_and_proyect(req_data.get("IDEvento"),req_data.get("proyectId"))
     if not evento_in_db:
         error = returnCodes.partial_response("TPM-4","",req_data.get("IDEvento"))
         listaErrores.append(error)
@@ -316,29 +317,27 @@ class bitacoraCSV(Resource):
             return returnCodes.custom_response(None, 404, "TPM-4")
         
         headers = ["fechainicio", "comentario", "fechafin"]
-        data_list = [
-            {"fechainicio": "2022-09-01 15:30:00", "comentario": "string1", "fechafin": "2022-09-02 15:30:00"},
-            {"fechainicio": "2022-09-03 15:30:00", "comentario": "string2", "fechafin": "2022-09-04 15:30:00"}
-        ]
-
+        
+        serialized_bitacora = bitacora_schema.dump(devices,many=true)
+        print(serialized_bitacora[0]['proyecto']['proyecto'])
         # Crear un archivo CSV en memoria
         csv_data = BytesIO()
         # Escribir las cabeceras en el CSV (codificadas como bytes)
         csv_data.write(','.join(headers).encode('utf-8') + b'\n')
+        #csv_data.write(','.join(headers)+ '\n')
+        for item in serialized_bitacora:
+            row = [item.get("fechaInicio", ""), item.get("fechaFin", ""), item.get("comentario", "")]
+            csv_data.write((row[0]+"," +row[2]+","+ row[1]).encode('utf-8') + b'\n')
+            
 
-        # Escribir los datos en el CSV
-        for row in data_list:
-            # Convertir las cadenas a bytes antes de escribirlas
-            csv_data.write(','.join(str(value) for value in row.values()).encode('utf-8') + b'\n')
-
-        # Configurar el cursor al principio del archivo
+    
         csv_data.seek(0)
 
         return send_file(
             csv_data,
             mimetype='text/csv',
             as_attachment=True,
-            download_name='bitacora.csv'
+            download_name=str(serialized_bitacora[0]['proyecto']['proyecto'])+'.csv'
         )
 
         #serialized_bitacora = bitacora_schema.dump(devices,many=true)

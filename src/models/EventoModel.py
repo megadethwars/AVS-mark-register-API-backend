@@ -64,6 +64,11 @@ class EventoModel(db.Model):
     @staticmethod
     def get_evento_by_nombre(value):
         return EventoModel.query.filter_by(IDEvento=value).first()
+
+
+    @staticmethod
+    def get_evento_by_nombre_and_proyect(value,projectId):
+        return EventoModel.query.filter_by(IDEvento=value,ProyectoId=projectId).first()
     
     @staticmethod
     def get_evento_by_like(value,offset,limit):
