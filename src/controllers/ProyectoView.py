@@ -258,3 +258,26 @@ class MovementFilter(Resource):
 
         serialized_device = proyecto_schema.dump(moves.items,many=True)
         return returnCodes.custom_response(serialized_device, 200, "TPM-3")
+    
+@nsProyecto.route("/allActive")
+@nsProyecto.response(404, "proyecto no encontrado")
+class ProyectAllActives(Resource):
+    
+    @nsProyecto.doc("obtener todos los eventos activos")
+    def get(self):
+        offset = 1
+        limit = 100
+
+        if "offset" in request.args:
+            offset = request.args.get('offset',default = 1, type = int)
+
+        if "limit" in request.args:
+            limit = request.args.get('limit',default = 100, type = int)
+
+
+        proyectos = ProyectoModel.get_all_active_proyects(offset,limit)
+        if not proyectos:
+            return returnCodes.custom_response(None, 404, "TPM-4")
+
+        serialized_evento = proyecto_schema.dump(proyectos.items,many=True)
+        return returnCodes.custom_response(serialized_evento, 200, "TPM-3")

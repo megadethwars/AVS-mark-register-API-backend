@@ -52,6 +52,10 @@ class ProyectoModel(db.Model):
     @staticmethod
     def get_all_projects(offset=0,limit=10):
         return ProyectoModel.query.order_by(ProyectoModel.id).offset(offset).limit(limit).all()
+    
+    @staticmethod
+    def get_all_active_proyects(offset,limit):
+        return ProyectoModel.query.with_entities(ProyectoModel.id,ProyectoModel.proyecto).filter(ProyectoModel.StatusProyectoId==1).order_by(ProyectoModel.fechaAlta).paginate(page=offset,per_page=limit,error_out=False)
 
     @staticmethod
     def get_one_project(id):

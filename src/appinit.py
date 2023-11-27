@@ -73,6 +73,13 @@ def create_app(env_name):
     #    """
     #    return "GKE Config Tester Backend is running in version 1.0.1"
 
+    @app.route("/index")
+    def index():
+        """
+        Ruta para la página web
+        """
+        return render_template("index.html")
+
 
 
     return app
