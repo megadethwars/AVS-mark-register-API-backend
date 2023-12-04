@@ -327,7 +327,8 @@ class bitacoraCSV(Resource):
         #csv_data.write(','.join(headers)+ '\n')
         for item in serialized_bitacora:
             row = [item.get("fechaInicio", ""), item.get("fechaFin", ""), item.get("comentario", "")]
-            csv_data.write((row[0]+"," +row[2]+","+ row[1]).encode('utf-8') + b'\n')
+            csv_data.write((('' if row[0] is None else row[0])+"," +('' if row[2] is None else row[2])+","+ ('' if row[1] is None else row[1])).encode('utf-8') + b'\n')
+            #csv_data.write(','.join(str('' if value is None else value) for value in row).encode('utf-8') + b'\n')
             
 
     

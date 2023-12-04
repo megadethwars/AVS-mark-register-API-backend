@@ -8,6 +8,7 @@ from ..models import db
 from ..shared import returnCodes
 from flask_restx import Api,fields,Resource
 from werkzeug.security import generate_password_hash, check_password_hash
+from ..models import EventoModel
 
 app = Flask(__name__)
 Usuario_api = Blueprint("users_api", __name__)
@@ -177,7 +178,7 @@ class UsersLogin(Resource):
             
             return returnCodes.custom_response(None, 404, "TPM-4","Usuario no encontrado")
 
-        if user.statusId==3:
+        if user.rolId==3:
             return returnCodes.custom_response(None, 409, "TPM-19","Usuario dado de baja")
 
 
@@ -325,6 +326,10 @@ class UserEvent(Resource):
             data = usuario_event_schema.load(req_data, partial=True,many=True)
         except ValidationError as err:
             return returnCodes.custom_response(None, 400, "TPM-2", str(err))
+        
+        item = EventoModel.get_evento_by_nombre_active(data[0]['event'])
+        if not item:
+            return returnCodes.custom_response(None, 404, "TPM-4","Evento NO activo")
 
         try:
             data[0]['proyectoId']

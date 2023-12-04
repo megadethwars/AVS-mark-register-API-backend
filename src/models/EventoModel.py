@@ -69,6 +69,10 @@ class EventoModel(db.Model):
     @staticmethod
     def get_evento_by_nombre(value):
         return EventoModel.query.filter_by(IDEvento=value).first()
+    
+    @staticmethod
+    def get_evento_by_nombre_active(value):
+        return EventoModel.query.filter_by(IDEvento=value,activo=True).first()
 
 
     @staticmethod
