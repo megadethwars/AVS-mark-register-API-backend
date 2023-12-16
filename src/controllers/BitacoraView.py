@@ -13,7 +13,13 @@ from ..shared import returnCodes
 from flask_restx import Api,fields,Resource,reqparse
 from io import BytesIO
 from io import StringIO
+from docx import Document
 import csv
+from docx.shared import RGBColor
+from docx.shared import Pt
+from docx.shared import Inches
+
+
 
 app = Flask(__name__)
 parser = reqparse.RequestParser()
@@ -319,7 +325,9 @@ class bitacoraCSV(Resource):
         headers = ["fechainicio", "comentario", "fechafin"]
         
         serialized_bitacora = bitacora_schema.dump(devices,many=true)
-        print(serialized_bitacora[0]['proyecto']['proyecto'])
+        if len(serialized_bitacora)==0:
+            return returnCodes.custom_response(None, 404, "TPM-4")
+
         # Crear un archivo CSV en memoria
         csv_data = BytesIO()
         # Escribir las cabeceras en el CSV (codificadas como bytes)
@@ -343,3 +351,94 @@ class bitacoraCSV(Resource):
 
         #serialized_bitacora = bitacora_schema.dump(devices,many=true)
         #return returnCodes.custom_response(serialized_bitacora, 200, "TPM-3")
+
+@nsBitacora.route("/doc")
+@nsBitacora.expect(parser)
+@nsBitacora.response(404, "bitacora no encontrada")
+class bitacoraDOC(Resource):
+    
+    @nsBitacora.doc("obtener varias bitacoras")
+    @api.expect(BitacoraQueryModel)
+    def post(self):
+        
+        if request.is_json is False:
+            return returnCodes.custom_response(None, 400, "TPM-2")
+
+        req_data = request.json
+        data = None
+        if(not req_data):
+            return returnCodes.custom_response(None, 400, "TPM-2")
+        try:
+            data = bitacora_schema_query.load(req_data, partial=True)
+        except ValidationError as err:
+            return returnCodes.custom_response(None, 400, "TPM-2", str(err))
+
+        devices = BitacoraModel.get_Bitacora_by_query_csv(data)
+        if not devices:
+            return returnCodes.custom_response(None, 404, "TPM-4")
+        
+        serialized_bitacora = bitacora_schema.dump(devices,many=true)
+        if len(serialized_bitacora)==0:
+            return returnCodes.custom_response(None, 404, "TPM-4")
+        
+        document = Document()
+        document.add_heading('Ejemplo de Documento', 0)
+
+
+        table0 = document.add_table(rows=2, cols=2, style='Table Grid')
+        table0.cell(0, 0).width = Inches(9.0)
+        table0.cell(0, 0).text = 'fecha'
+        ##table0.style = 'Colorful List'
+        table0.fill_color = RGBColor(0, 0, 255)
+        table0.cell(1, 0).text = 'titulo de la historia'
+        table0.cell(1, 1).text = 'Libre'
+        table0.cell(0, 0).merge(table0.cell(0, 1))
+
+        paragraph = document.add_paragraph()
+
+        paragraph.add_run('\n')
+
+        #segunda tabla
+        table1 = document.add_table(rows=2, cols=3, style='Table Grid')
+        
+        table1.cell(0, 0).text = 'Localizacion'
+        table1.cell(0, 1).text = 'Evento'
+        table1.cell(0, 2).text = 'Reality'
+
+        table1.cell(1, 0).text = 'Alberca'
+        table1.cell(1, 1).text = 'Amistad'
+        table1.cell(1, 2).text = 'El bar'
+
+        ##table0.style = 'Colorful List'
+        table1.fill_color = RGBColor(0, 0, 255)
+        table1.cell(1, 0).text = 'titulo de la historia'
+        table1.cell(1, 1).text = 'Libre'
+
+        paragraph = document.add_paragraph()
+
+        paragraph.add_run('\n')
+
+        #tercer tabla de comentarios
+        table3 = document.add_table(rows=len(serialized_bitacora), cols=3, style='Table Grid')
+
+        counter=0
+        for item in serialized_bitacora:
+            row = [item.get("fechaInicio", ""), item.get("fechaFin", ""), item.get("comentario", "")]
+            table3.cell(counter, 0).text = '' if row[0] is None else row[0]
+            table3.cell(counter, 1).text = '' if row[2] is None else row[2]
+            table3.cell(counter, 2).text = '' if row[1] is None else row[1]
+            counter=counter+1
+
+
+        # Guardar el documento en un objeto BytesIO
+        buffer = BytesIO()
+        document.save(buffer)
+        buffer.seek(0)
+
+        # Devolver el archivo como respuesta con Flask
+        return send_file(
+            buffer,
+            download_name='ejemplo34.docx',
+            as_attachment=True,
+            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )

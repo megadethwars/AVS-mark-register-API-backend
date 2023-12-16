@@ -75,9 +75,7 @@ def create_app(env_name):
 
     @app.route("/index")
     def index():
-        """
-        Ruta para la página web
-        """
+       
         return render_template("index.html")
 
 

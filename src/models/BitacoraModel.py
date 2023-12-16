@@ -133,8 +133,8 @@ class BitacoraSchema(Schema):
     isVentana = fields.Bool()
     proyecto = fields.Nested(ProyectoSchema)
     usuario = fields.Nested(UsuariosSchema)
-    fechaInicio = fields.DateTime()
-    fechaFin = fields.DateTime()
+    fechaInicio = fields.DateTime(required=True)
+    fechaFin = fields.DateTime(required=True)
     fechaUltimaModificacion = fields.DateTime()
 
 
